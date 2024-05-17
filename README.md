@@ -8,8 +8,11 @@ How to use?
 Just run as Administrator "smi.exe" while you are in the menu or in-game! 
 
 Keys?
+
 P => to Save current location
+
 O => to load last saved location
+
 Delete => Unload the script
 
 May post more features and better looks later .. Thanks.
