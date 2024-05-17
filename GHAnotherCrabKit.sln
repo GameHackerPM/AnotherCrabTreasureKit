@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHAnotherCrabKit", "GHAnotherCrabKit\GHAnotherCrabKit.csproj", "{DE79955C-063D-4CA3-A7B1-4F73C38B5781}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Debug|x64.ActiveCfg = Debug|x64
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Debug|x64.Build.0 = Debug|x64
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Release|x64.ActiveCfg = Release|x64
+		{DE79955C-063D-4CA3-A7B1-4F73C38B5781}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2D7CB08A-A897-47CB-9D5E-520BFF0CB0EF}
+	EndGlobalSection
+EndGlobal
