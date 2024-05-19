@@ -1,7 +1,12 @@
 # AnotherCrabTreasureKit
 A simple tool for speedrunners helping practice for the game.
 
-Hello, this is a very basic v0.2 tool for Saving Location and Load the last saved location! It require .NETFramework 4.8 If not installed, you can install it from this link: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
+Hello, this is a very basic v0.5 tool for Saving Location and Load the last saved location! It require .NETFramework 4.8 If not installed, you can install it from this link: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
+
+Screenshot
+
+![image](https://github.com/GameHackerPM/AnotherCrabTreasureKit/assets/7836215/4c5ea609-1d0c-4bd6-a1dc-3777b093a404)
+
 
 How to use? 
 
