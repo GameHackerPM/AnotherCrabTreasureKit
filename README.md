@@ -5,6 +5,7 @@ Hello, this is a very basic v0.6 tool which has some features that can be helpfu
 
 # **Screenshot**
 **Main Menu**
+
 ![image](https://github.com/GameHackerPM/AnotherCrabTreasureKit/assets/7836215/4c5ea609-1d0c-4bd6-a1dc-3777b093a404)
 
 **Debug Menu: (After enabling Debug Mode)**
@@ -18,7 +19,7 @@ Just run as Administrator "smi.exe" while you are in the menu or in-game!
 
 # **Keys?**
 
-i => Toggle GodMode. (Which enable Speed, No Cost, Unkillable and more..)
+I => Toggle GodMode. (Which enable Speed, No Cost, Unkillable and more..)
 
 P => to Save current location.
 
