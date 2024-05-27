@@ -6,7 +6,7 @@ Hello, this is a very basic v0.6 tool which has some features that can be helpfu
 # **Screenshot**
 **Main Menu**
 
-![image](https://github.com/GameHackerPM/AnotherCrabTreasureKit/assets/7836215/4c5ea609-1d0c-4bd6-a1dc-3777b093a404)
+![image](https://github.com/GameHackerPM/AnotherCrabTreasureKit/assets/7836215/a38203c3-97f5-46fe-9000-6c86c737d162)
 
 **Debug Menu: (After enabling Debug Mode)**
 ![image](https://github.com/GameHackerPM/AnotherCrabTreasureKit/assets/7836215/3784831d-0f2c-449f-bc65-a9fba9b53c8e)
