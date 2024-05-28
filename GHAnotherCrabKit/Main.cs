@@ -20,6 +20,7 @@ namespace GHAnotherCrabKit
         Color originalColor;
         string fadingLabelContent = "";
         private bool isInvincible = false, airJump = false, isInvisible = false, invisiblityStatus = false;
+        private string calTrainerState = "Off";
         private Rect windowRect = new Rect(0, 0, 400, 400);
         private int tabIndex = 0;
         private Color backgroundColor = Color.grey;
@@ -131,6 +132,34 @@ namespace GHAnotherCrabKit
 
                             cube.GetComponent<MeshRenderer>().sharedMaterial = mat;
                             cube.transform.localEulerAngles = new Vector3();
+                        }
+                    }
+
+                    //CAL Jump code
+                    SkinnedMeshRenderer mr = _player.transform.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                    //MethodInfo method = AccessTools.Method(typeof(Player), "Jump");
+                    Material mat = null;
+
+                    //Blink near correct timing
+                    if (_player.anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= .525 && _player.anim.GetCurrentAnimatorStateInfo(0).normalizedTime < .575 && _player.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name == "an_Kril_AtkChargeThrust")
+                    {
+
+                        if (mr != null && hasSetMat == false && (calTrainerState == "Visual" || calTrainerState == "Automatic"))
+                        {
+                            mat = mr.material;
+                            hasSetMat = true;
+                            Debug.Log("found");
+                            mr.SetMaterial(null);
+                            mr.material.color = Color.blue;
+                            _player.StartCoroutine(ColorFlashCoroutine(mat, mr));
+                        }
+                    }
+                    //Auto Jump
+                    if (_player.anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= .55 && _player.anim.GetCurrentAnimatorStateInfo(0).normalizedTime < .65 && _player.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name == "an_Kril_AtkChargeThrust")
+                    {
+                        if (calTrainerState == "Automatic")
+                        {
+                            _player.Jump()
                         }
                     }
                 }
@@ -253,6 +282,15 @@ namespace GHAnotherCrabKit
                     airJump = GUILayout.Toggle(airJump, "Air Jump");
                     isInvincible = GUILayout.Toggle(isInvincible, "Invincible (U)");
                     isInvisible = GUILayout.Toggle(isInvisible, "Invisible");
+                    if (GUILayout.Button("CAL Trainer - " + calTrainerState))
+                    {
+                        switch (calTrainerState)
+                        {
+                            case "Visual": calTrainerState = "Automaitc"; break;
+                            case "Automatic": calTrainerState = "Off"; break;
+                            default: calTrainerState = "Visual"; break;
+                        }
+                    }
                     GUILayout.Label("Key 'i' ==> Toggle GodMode (Speed, unkillable, ..etc).");
                     GUILayout.Label("Key 'P' ==> Save Current Location.");
                     GUILayout.Label("Key 'O' ==> Load Last Saved Location.");
