@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,8 @@ using Unity;
 
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Analytics;
+using UnityEngine.UIElements;
 
 
 namespace GHAnotherCrabKit
@@ -18,14 +21,29 @@ namespace GHAnotherCrabKit
         float alphaAmount = 0f;
         bool showFadingLabel = false;
         Color originalColor;
-        string fadingLabelContent = "";
-        private bool isInvincible = false, airJump = false, isInvisible = false, invisiblityStatus = false;
+        string fadingLabelContent = "", velocityVal = "";
+        private string ForDebuggingString = "";
+        private bool isInvincible = false, airJump = false, isInvisible = false, invisiblityStatus = false, hasSetMat = false;
+        private string calTrainerState = "Off";
         private Rect windowRect = new Rect(0, 0, 400, 400);
         private int tabIndex = 0;
         private Color backgroundColor = Color.grey;
         private bool showMenu = true;
+        private bool showVelocity = true, showEnemies = true;
         private Vector2 mainScrollPos = Vector2.zero;
         private Vector2 scrollPos = Vector2.zero;
+        private GUIStyle infoGUIStyle = null;
+        private List<Enemy> enemyList = null;
+        private Camera _mCamera;
+        private IEnumerator EntityUpdate = null;
+
+        Main()
+        {
+            infoGUIStyle = new GUIStyle();
+            infoGUIStyle.normal.textColor = Color.red;
+            infoGUIStyle.border.Add(new Rect(1f, 1f, 1f, 1f));
+            _mCamera = Camera.main;
+        }
         //private Hook damageHook;
         public void Start()
         {
@@ -37,12 +55,50 @@ namespace GHAnotherCrabKit
                     ShellCollectableList.Add(shellCollectableItem);
                 }
             }
-            FadeLabel("Game Injected!");
 
-            //damageHook = new Hook(
-            //    typeof(Player).GetMethod("TakeShellDamage", BindingFlags.Instance | BindingFlags.Public),
-            //    typeof(Main).GetMethod("TakeShellDamage"));
+            EntityUpdate = EntityUpdateFunc(0f);
+            StartCoroutine(EntityUpdate);
+            FadeLabel("Game Injected!");
         }
+        private Vector3 W2S(Vector3 worldPosition)
+        {
+            return _mCamera.WorldToScreenPoint(worldPosition);
+        }
+
+        private float Distance(Vector3 worldPosition)
+        {
+            return Vector3.Distance(_mCamera.transform.position, worldPosition);
+        }
+        private bool IsVisible(GameObject target, Vector3 position, Vector3 origin, LayerMask mask)
+        {
+            Ray ray = new Ray(origin, (position - origin).normalized);
+            if (Physics.Raycast(ray, out RaycastHit hit, Single.PositiveInfinity, mask))
+            {
+                if (hit.collider.gameObject == target)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private void Basic_ESP(Vector3 position, string text, float additionalY = 0f)
+        {
+            Vector3 pos = _mCamera.WorldToScreenPoint(position);
+            if (pos.z > 0)
+            {
+                GUI.Label(new Rect(
+                        pos.x,
+                        Screen.height - pos.y + additionalY,
+                        pos.x + (text.Length * GUI.skin.label.fontSize),
+                        Screen.height - pos.y + GUI.skin.label.fontSize * 2),
+                    text);
+            }
+        }
+
 
         public static void TakeShellDamage(Action<Player, float, bool, bool> orig, Player self, float damage, bool crushing, bool trueDamage = false)
         {
@@ -57,8 +113,12 @@ namespace GHAnotherCrabKit
             var gameManager = GameManager.instance;
             if (_player != null)
             {
+                _mCamera = Camera.main;
                 //if (Input.GetKeyDown(KeyCode.L))
                 //    DebugSettings.settings.debugBuildSettings.debugMode = !DebugSettings.settings.debugBuildSettings.debugMode;
+
+                if (showVelocity)
+                    velocityVal = $"Curr Velocity: {(_player.velocity.x != 0.0f ? _player.velocity.magnitude : 0.0f):F}";
 
                 if (Input.GetKeyDown(KeyCode.P))
                 {
@@ -134,6 +194,34 @@ namespace GHAnotherCrabKit
                         }
                     }
                 }
+
+                if (calTrainerState != "Off" && _player.anim.GetCurrentAnimatorClipInfo(0)[0].clip.name == "an_Kril_AtkChargeThrust")
+                {
+                    var animState = _player.anim.GetCurrentAnimatorStateInfo(0);
+                    if (animState.normalizedTime >= .525 && animState.normalizedTime < .575)
+                    {
+                        //CAL Jump code
+                        SkinnedMeshRenderer mr = _player.transform.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                        Material matx = null;
+
+                        if (mr != null && hasSetMat == false &&
+                            (calTrainerState == "Visual" || calTrainerState == "Automatic"))
+                        {
+                            matx = mr.material;
+                            hasSetMat = true;
+                            mr.material.color = Color.blue;
+                            mr.material = null;
+                            _player.StartCoroutine(ColorFlashCoroutine(matx, mr));
+                        }
+                    }
+
+                    //Auto Jump
+                    if (calTrainerState == "Automatic" && animState.normalizedTime >= .55 && animState.normalizedTime < .65)
+                    {
+                        _player.CallProtectedMethod("Jump");
+                    }
+                }
+
                 if (gameManager != null)
                 {
                     if (Input.GetKeyDown(KeyCode.I))
@@ -158,7 +246,9 @@ namespace GHAnotherCrabKit
                 if (airJump)
                 {
                     if (_player.input.controller.GetButtonDown("Jump"))
-                        _player.EjectJump();
+                    {
+                        _player.CallProtectedMethod("Jump");
+                    }
                 }
 
                 if (isInvisible)
@@ -171,6 +261,16 @@ namespace GHAnotherCrabKit
                     _player.statusEffects.stealth = false;
                     invisiblityStatus = false;
                 }
+
+                if (showEnemies && EntityUpdate == null)
+                {
+                    EntityUpdate = EntityUpdateFunc(0f);
+                    StartCoroutine(EntityUpdate);
+                }
+            }
+            else
+            {
+                enemyList = null;
             }
 
             if (Input.GetKeyDown(KeyCode.Insert))
@@ -182,13 +282,35 @@ namespace GHAnotherCrabKit
                 {
                     _player.CancelInvincibility();
                     _player.statusEffects.stealth = false;
+                    if (gameManager.godMode)
+                        gameManager.ToggleGodmode();
+                    showEnemies = false;
+                    EntityUpdate = null;
                 }
 
-                //damageHook?.Undo();
                 Loader.UnLoad();
             }
         }
 
+        public IEnumerator ColorFlashCoroutine(Material mat, SkinnedMeshRenderer mr)
+        {
+            yield return new WaitForSeconds(.1f);
+            mr.material = mat;
+            hasSetMat = false;
+        }
+
+        private IEnumerator EntityUpdateFunc(float time)
+        {
+            yield return new WaitForSeconds(time);
+            enemyList = FindObjectsOfType<Enemy>().ToList();
+            if (showEnemies)
+            {
+                EntityUpdate = EntityUpdateFunc(3f);
+                StartCoroutine(EntityUpdate);
+            }
+            else
+                EntityUpdate = null;
+        }
         public void FadeLabel(string message)
         {
             alphaAmount = 0f;
@@ -197,13 +319,17 @@ namespace GHAnotherCrabKit
         }
         public void OnGUI()
         {
-            if (showFadingLabel && alphaAmount < 1f)
+            //if (UnityEngine.Event.current.type != EventType.Repaint)
+            //    return;
+            if (!string.IsNullOrEmpty(ForDebuggingString))
+                GUI.Label(new Rect(Screen.width / 2, 60, 200f, 150f), ForDebuggingString);
+            if (showFadingLabel && alphaAmount < 2f)
             {
                 alphaAmount += 0.3f * Time.deltaTime;
-                GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, alphaAmount);
+                GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, alphaAmount >= 1f ? 2f - alphaAmount : alphaAmount);
                 GUI.Label(new Rect(Screen.width / 2, 40, 200f, 50f), fadingLabelContent);
             }
-            else if (alphaAmount >= 1f)
+            else if (alphaAmount >= 2f)
             {
                 alphaAmount = 0f;
                 GUI.color = originalColor;
@@ -214,9 +340,45 @@ namespace GHAnotherCrabKit
             {
                 GUI.backgroundColor = backgroundColor;
 
-                windowRect = GUI.Window(0, windowRect, MenuWindow, "Menu SDK <GH> V0.6 ('Insert' to Show/Hide Menu)");
+                windowRect = GUI.Window(0, windowRect, MenuWindow, "Menu SDK <GH> V0.7 ('Insert' to Show/Hide Menu)");
             }
-            //GUI.Label(new Rect(Screen.width / 2, Screen.height / 2, 150f, 50f), "Game Injected!");
+
+            if (showVelocity)
+            {
+                GUI.Label(new Rect(50f, Screen.height - 250f, 400f, 50f), velocityVal, infoGUIStyle);
+            }
+
+            if (showEnemies)
+            {
+                if (enemyList != null)
+                {
+                    foreach (var enemy in enemyList)
+                    {
+                        var pos = enemy.GetCenter();
+                        float distance = Vector3.Distance(_mCamera.transform.position, pos);
+                        if (distance > 700f)
+                            continue;
+
+                        //if (!IsVisible(enemy.gameObject, enemy.GetCenter(), _player.transform.position, GlobalSettings.settings.groundLayers))
+                        //    continue;
+                        //Render.DrawBox(new Vector2(pos.x, pos.y), new Vector2(20f, 20f), Color.red);
+                        //GUI.DrawTexture(new Rect(
+                        //    pos.x,
+                        //    Screen.height - pos.y,
+                        //    pos.x + 20f,
+                        //    Screen.height - pos.y + 20f *2), Texture2D.whiteTexture, ScaleMode.StretchToFill);
+                        //string minifiedName = "";
+                        //var splitNameParts = enemy.name.Split('_');
+                        //if (splitNameParts.Length > 2)
+                        //    minifiedName = splitNameParts[1] + splitNameParts[2];
+                        //else
+                        //    minifiedName = splitNameParts[1];
+
+                        Basic_ESP(pos, "Name: " + enemy.name.Replace("Enemy_", ""), 30f);
+                        Basic_ESP(pos, $"HP: {enemy.health:##.##}/{enemy.startingHealth:##.##}", 50f);
+                    }
+                }
+            }
         }
         void MenuWindow(int windowID)
         {
@@ -225,6 +387,11 @@ namespace GHAnotherCrabKit
             if (GUILayout.Toggle(tabIndex == 0, "Main", "Button", GUILayout.ExpandWidth(true)))
             {
                 tabIndex = 0;
+            }
+
+            if (GUILayout.Toggle(tabIndex == 1, "Indicators", "Button", GUILayout.ExpandWidth(true)))
+            {
+                tabIndex = 1;
             }
 
             GUILayout.EndVertical();
@@ -257,6 +424,27 @@ namespace GHAnotherCrabKit
                     GUILayout.Label("Key 'P' ==> Save Current Location.");
                     GUILayout.Label("Key 'O' ==> Load Last Saved Location.");
                     GUILayout.Label("Key 'Delete' ==> Unload the tool.");
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                    GUILayout.EndScrollView();
+                    GUILayout.EndVertical();
+                    break;
+                case 1:
+                    GUILayout.BeginVertical(GUI.skin.box);
+                    mainScrollPos = GUILayout.BeginScrollView(mainScrollPos);
+                    if (GUILayout.Button("CAL Trainer - " + calTrainerState))
+                    {
+                        switch (calTrainerState)
+                        {
+                            case "Visual": calTrainerState = "Automatic"; break;
+                            case "Automatic": calTrainerState = "Off"; break;
+                            default: calTrainerState = "Visual"; break;
+                        }
+                    }
+                    GUILayout.BeginHorizontal();
+                    GUILayout.BeginVertical();
+                    showVelocity = GUILayout.Toggle(showVelocity, "Show Velocity.");
+                    showEnemies = GUILayout.Toggle(showEnemies, "Show Enemy Infos.");
                     GUILayout.EndHorizontal();
                     GUILayout.EndVertical();
                     GUILayout.EndScrollView();
