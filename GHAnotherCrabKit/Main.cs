@@ -420,6 +420,15 @@ namespace GHAnotherCrabKit
                     airJump = GUILayout.Toggle(airJump, "Air Jump");
                     isInvincible = GUILayout.Toggle(isInvincible, "Invincible (U)");
                     isInvisible = GUILayout.Toggle(isInvisible, "Invisible");
+                    if (GUILayout.Button("CAL Trainer - " + calTrainerState))
+                    {
+                        switch (calTrainerState)
+                        {
+                            case "Visual": calTrainerState = "Automaitc"; break;
+                            case "Automatic": calTrainerState = "Off"; break;
+                            default: calTrainerState = "Visual"; break;
+                        }
+                    }
                     GUILayout.Label("Key 'i' ==> Toggle GodMode (Speed, unkillable, ..etc).");
                     GUILayout.Label("Key 'P' ==> Save Current Location.");
                     GUILayout.Label("Key 'O' ==> Load Last Saved Location.");
