@@ -1,7 +1,7 @@
 # AnotherCrabTreasureKit
 A simple tool for speedrunners helping practice for the game.
 
-Hello, this is a very basic v0.6 tool which has some features that can be helpful for speedrunners for the game! It require .NETFramework 4.8 If not installed, you can install it from this link: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
+Hello, this is a very basic v0.7 tool which has some features that can be helpful for speedrunners for the game! It require .NETFramework 4.8 If not installed, you can install it from this link: https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
 
 # **Screenshot**
 **Main Menu**
